@@ -1,11 +1,17 @@
 import xml.etree.ElementTree as ET
 import os
+import sys
 import re
 
 from os.path import splitext, join
 
+if len(sys.argv) < 3:
+    print(f"Usage: {sys.argv[0]} input-dir output-dir", file=sys.stderr)
+    sys.exit(1)
 
-OUTPUT_DIR = 'lua/levels'
+INPUT_DIR = sys.argv[1]
+OUTPUT_DIR = sys.argv[2]
+
 GROUND_COMMANDS = [
     'hide',
     'show',
@@ -170,9 +176,10 @@ def parse_timing(text):
     return timings
 
 def read_xmls():
-    for name in os.listdir("maps/"):
-        print(f"maps/{name}")
-        levelXML[name] = ET.parse(f"maps/{name}")
+    for name in os.listdir(INPUT_DIR):
+        file_path = join(INPUT_DIR, name)
+        print(f"Parsing {file_path}")
+        levelXML[name] = ET.parse(file_path)
 
 def parse_traps():
     for (name, xml) in levelXML.items():
@@ -271,7 +278,7 @@ def generate_levels():
         filename = splitext(name)[0]
         generate_code(lines, name, xml)
         save_lua(join(OUTPUT_DIR, filename + '.lua'), lines)
-        level_requires += [f'  ["{filename}"] = pshy.require("levels.{filename}")(commands, TRAP_RELOAD, TRAP_DURATION),']
+        level_requires += [f'  ["{filename}"] = pshy.require("trap_levels.{filename}")(commands, TRAP_RELOAD, TRAP_DURATION),']
 
     lines = [
         'local traps = pshy.require("traps")',
