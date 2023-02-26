@@ -1,8 +1,3 @@
-pshy.require("pshy.events")
-
-local newgame = pshy.require("pshy.rotations.newgame")
-
-
 --- Contants
 local TRAP_DURATION = 5000
 local TRAP_RELOAD = 5000
@@ -868,7 +863,7 @@ do
     return ret
   end
 
-  function TrapSystem_eventContactListener(name, id, contact)
+  function TrapSystem_onContact(name, id, contact)
     local trap = _traps[id]
 
     if not trap then
@@ -1189,7 +1184,7 @@ do
     end,
   }
 
-  function TrapSystem_eventLoop(elapsed, remaining)
+  function TrapSystem_tick()
     for trapId in next, _active do
       TrapSystem:deactivate(trapId)
     end
@@ -1205,32 +1200,29 @@ do
 end
 
 
---- Events
-function eventNewGame()
-  local map = newgame.current_map
-
+--- Exports
+local function reset(traps)
   TrapGroupSystem:reset()
   TrapSystem:reset()
   resetGrounds()
+end
 
-	if map and map.traps then
-    local trapList = map.traps
-
-    for i=1, #trapList do
-      TrapSystem:register(trapList[i])
-    end
-	end
+local function load(traps)
+  for i=1, #traps do
+    TrapSystem:register(traps[i])
+  end
 
   TrapGroupSystem:register()
 end
-
-eventLoop = TrapSystem_eventLoop
-eventNewPlayer = reloadGrounds
-eventContactListener = TrapSystem_eventContactListener
 
 return {
   TRAP_DURATION = TRAP_DURATION,
   TRAP_RELOAD = TRAP_DURATION,
 
   commands = commands,
+  reset = reset,
+  load = load,
+  reloadGrounds = reloadGrounds,
+  tick = TrapSystem_tick,
+  onContact = TrapSystem_onContact,
 }

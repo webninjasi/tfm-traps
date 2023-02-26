@@ -5,12 +5,14 @@ import re
 
 from os.path import splitext, join
 
-if len(sys.argv) < 3:
-    print(f"Usage: {sys.argv[0]} input-dir output-dir", file=sys.stderr)
+if len(sys.argv) < 4:
+    print(f"Usage: {sys.argv[0]} input-dir output-dir require-call", file=sys.stderr)
     sys.exit(1)
 
+# Example: ./trap_levels/ ./lua/trap_levels/ 'pshy.require("trap_levels.%s")'
 INPUT_DIR = sys.argv[1]
 OUTPUT_DIR = sys.argv[2]
+REQUIRE_CALL = sys.argv[3]
 
 GROUND_COMMANDS = [
     'hide',
@@ -271,25 +273,26 @@ def generate_command_code(lines, cmd):
     lines += [f'          commands["{cmd["type"]}"]({concat_command_params(cmd["params"])}),']
 
 def generate_levels():
-    level_requires = []
+    init_lines = [
+        'return function(traps)',
+        '  local commands = traps.commands',
+        '  local TRAP_RELOAD = traps.TRAP_RELOAD',
+        '  local TRAP_DURATION = traps.TRAP_DURATION',
+        '  return {',
+    ]
 
     for (name, xml) in levelXML.items():
         lines = []
         filename = splitext(name)[0]
         generate_code(lines, name, xml)
         save_lua(join(OUTPUT_DIR, filename + '.lua'), lines)
-        level_requires += [f'  ["{filename}"] = pshy.require("trap_levels.{filename}")(commands, TRAP_RELOAD, TRAP_DURATION),']
+        init_lines += [f'    ["{filename}"] = {REQUIRE_CALL % filename}(commands, TRAP_RELOAD, TRAP_DURATION),']
 
-    lines = [
-        'local traps = pshy.require("traps")',
-        'local commands = traps.commands',
-        'local TRAP_RELOAD = traps.TRAP_RELOAD',
-        'local TRAP_DURATION = traps.TRAP_DURATION',
-        'return {',
+    init_lines += [
+        '  }',
+        'end',
     ]
-    lines += level_requires
-    lines += ['}']
-    save_lua(join(OUTPUT_DIR, 'init.lua'), lines)
+    save_lua(join(OUTPUT_DIR, 'init.lua'), init_lines)
 
 def generate_code(lines, name, xml):
     lines += ['return function(commands, TRAP_RELOAD, TRAP_DURATION)']
