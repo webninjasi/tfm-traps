@@ -1,0 +1,150 @@
+# Trap System
+
+- Trap system allows map designers to access various lua features 
+
+## XML
+
+- Trap commands can be used in `onactivate`, `ondeactivate`, `ontouch` and `ontimer` attributes.
+- Any ground that has `lua`, `onactivate`, `ondeactivate`, `ontouch` or `ontimer` attributes will be removed from the xml and recreated by the script.
+- You can change trap timings using `duration` and `reload` attributes. (milliseconds)
+    - Both attributes have two parameters seperated by a comma.
+    - First parameter affects `onactivate`.
+        - Example: `duration="1000"`
+    - Second parameter affects `ontimer`.
+        - Example: `duration="1000,2000"`
+        - Example 2: `duration=",2000"`
+- Calls to `ontimer` can be configured using `delay` and `interval` attributes. (multiples of 0.5 in seconds)
+- You can use `i="x,y,image"` and `imgp="scalex,scaley,rotation,alpha,anchorx,anchory,fadeIn"` attributes to replace the ground texture.
+- You can name grounds using `lua="name"` attribute.
+- You can clone traps using `template="name"` attribute.
+- You might want to use `noground` attribute when you want to use trap commands without spawning a ground.
+- You can specify groups using `groups="groupname,behaviour;groupname2;..."` attribute.
+    - Available behaviours:
+        - `always` : all traps will be activated when the group is activated (default)
+        - `random` : a random combination of traps will be activated when the group is activated
+        - `randomone` : only a random trap among the group will be activated when the group is activated
+
+## Trap Commands
+
+- activate[@trap/#group]
+    - activates a trap or a group of traps
+    - Defaults:
+        - trap = self
+- gravitywind[gravityFactor,windFactor]
+    - changes gravity **and** wind factor on contact
+    - Defaults:
+        - gravityFactor = 1
+        - windFactor = 1
+    - Notes:
+        - gravity affecting the player = gravity of the map X gravity factor
+        - wind affecting the player = wind of the map X wind factor
+        - if the map has no gravity, changing the gravity factor won't affect anything
+        - if the map has no wind, changing the wind factor won't affect anything
+- aie[enable,sensitivity]
+    - enables/disables aie mode on contact
+    - Defaults:
+        - enable = 1
+        - sensitivity = 1
+    - Notes:
+        - it doesn't reset to original after respawn
+- cheese[give]
+    - gives or removes the cheese on touch
+    - Defaults:
+        - give = 1
+- object[type,x,y,ghost,angle,vx,vy,fx,fy]
+    - creates a shaman object
+    - Defaults:
+        - type = 1
+        - x = groundx
+        - y = groundy
+        - ghost = false
+        - angle = 0
+        - vx = 0
+        - vy = 0
+- hide
+    - hides the ground
+- show
+    - shows the ground
+- toggle
+    - toggles the ground
+- move[x,y,relative,vx,vy,relative,angle,relative]
+    - changes spatial properties of the ground
+    - Defaults:
+        - x = 0, y = 0, relative = 1
+        - vx = 0, vy = 0, relative = 1
+        - angle = 0, relative = 1
+- speed[x,y,relative,indirect]
+    - changes the player's speed on touch
+    - Defaults:
+        - x = 0
+        - y = 0
+        - relative = yes
+        - indirect = no
+- teleport[x,y,relative,indirect]
+    - teleports the player on touch
+    - Defaults:
+        - x = 0
+        - y = 0
+        - relative = yes
+        - indirect = no
+- height[value]
+    - changes ground height
+    - Defaults:
+        - value = 10
+- width[value]
+    - changes ground width
+    - Defaults:
+        - value = 10
+- damping[linear,angular]
+    - changes damping values of the ground
+- color(code)
+    - changes ground color
+    - color code should be 
+- foreground[enable]
+    - Defaults:
+        - enable = 1
+- fixed[enable]
+    - Defaults:
+        - enable = 1
+- mass(value)
+    - changes ground mass
+- restitution(value)
+- friction(value)
+- kill
+    - kills the player on touch
+- collision[mice,ground]
+    - changes ground collision
+    - Defaults:
+        - mice = 1
+        - ground = 1
+- angle(value)
+    - changes ground rotation/angle
+- dynamic[enable]
+    - makes the ground dynamic/static
+    - Defaults:
+        - enable = 1
+- type(value)
+    - changes ground type
+- image(image),[x,y,scalex,scaley,rotation,alpha,anchorx,anchory,fadeIn]
+    - changes ground image
+    - Defaults:
+        - x = 0
+        - y = 0
+        - scalex = 1
+        - scaley = 1
+        - rotation = 0
+        - alpha = 1,
+        - anchorx = 0.5
+        - anchory = 0.5
+        - fadeIn = no
+- sound(url), [volume, x, y]
+    - plays a sound
+    - if x is -, it'll be the same as ground x position
+    - if y is -, it'll be the same as ground y position
+- music(channel), [url, volume, loop, fade]
+    - plays the music if a url is given otherwise stops the music
+- freeze[enabled,displayIce]
+    - freeze on touch
+    - Defaults:
+        - enabled = true
+        - displayIce = true
